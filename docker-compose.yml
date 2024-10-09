@@ -1,0 +1,25 @@
+name: pet-system
+
+services:
+  postgresql:
+    image: postgres:16
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: THIS-IS-PG-PASSWORD@12345
+      POSTGRES_DB: pet_system
+    volumes:
+      - ./docker/postgresql:/var/lib/postgresql/data
+
+  pgadmin4:
+    image: dpage/pgadmin4
+    restart: always
+    ports:
+      - 8080:80
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@teelyjc.dev
+      PGADMIN_DEFAULT_PASSWORD: THIS-IS-PG-PASSWORD@12345
+    volumes:
+      - ./docker/pgadmin:/var/lib/pgadmin
