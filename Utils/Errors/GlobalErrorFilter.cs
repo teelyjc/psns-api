@@ -4,33 +4,21 @@ using server.Domains;
 
 namespace server.Utils.Error
 {
-	public static class ExceptionExtension
-	{
-		public static bool IsHttpRequestException(this Exception exception)
-		{
-			return (exception.GetType().FullName == "System.Net.Http.Http.HttpRequestException");
-		}
-	}
+  public class GlobalExceptionFilter : IExceptionHandler
+  {
+    public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
+    {
+      Response response = new()
+      {
+        Success = false,
+        Error = new Domains.Error()
+        {
+          message = exception.Message,
+        },
+      };
 
-	public class GlobalExceptionFilter : IExceptionHandler
-	{
-		public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
-		{
-			if (exception.IsHttpRequestException())
-			{
-				Response response = new()
-				{
-					success = false,
-					error = new Domains.Error()
-					{
-						message = exception.Message,
-					},
-				};
-
-				await httpContext.Response.WriteAsJsonAsync(response, cancellationToken);
-			}
-
-			return true;
-		}
-	}
+      await httpContext.Response.WriteAsJsonAsync(response, cancellationToken);
+      return true;
+    }
+  }
 }
