@@ -2,19 +2,19 @@ namespace server.Domains
 {
   class Response
   {
-    public bool success
+    public bool Success
     {
       get;
       set;
     }
 
-    public object? data
+    public object? Data
     {
       get;
       set;
     }
 
-    public Error? error
+    public Error? Error
     {
       get;
       set;
