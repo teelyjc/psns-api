@@ -1,3 +1,4 @@
+using Npgsql.Replication;
 using server.Libs;
 using server.Repositories;
 using server.Usecases;
@@ -5,40 +6,50 @@ using server.Utils.Error;
 
 namespace Program
 {
-  public class Program
-  {
-    public static void Main(string[] args)
-    {
-      PgConnection connection = new();
-      UsersRepository usersRepository = new(connection);
+	public class Program
+	{
+		public static void Main(string[] args)
+		{
+			var app = Program.Create(args);
+			Program.Run(app);
+		}
 
-      WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+		public static WebApplicationBuilder Create(string[] args)
+		{
+			var builder = WebApplication.CreateBuilder(args);
 
-      builder.Services.AddScoped(p => new PgConnection());
+			builder.Services.AddScoped(p => new PgConnection());
 
-      builder.Services.AddScoped<UsersRepository>();
-      builder.Services.AddScoped<PetsRepository>();
+			builder.Services.AddScoped<UsersRepository>();
+			builder.Services.AddScoped<UsersUsecases>();
 
-      builder.Services.AddScoped<UsersUsecases>();
-      builder.Services.AddScoped<PetsUsecases>();
+			builder.Services.AddScoped<PetsRepository>();
+			builder.Services.AddScoped<PetsUsecases>();
 
-      builder.Services.AddExceptionHandler<GlobalExceptionFilter>();
+			builder.Services.AddExceptionHandler<GlobalExceptionFilter>();
 
-      builder.Services.AddControllers();
-      builder.Services.AddSwaggerGen();
+			builder.Services.AddControllers();
+			builder.Services.AddSwaggerGen();
 
-      WebApplication app = builder.Build();
+			return builder;
+		}
 
-      if (app.Environment.IsDevelopment())
-      {
-        app.UseSwagger();
-        app.UseSwaggerUI();
-      }
+		public static void Run(WebApplicationBuilder builder)
+		{
+			var app = builder.Build();
 
-      app.UseExceptionHandler(_ => { });
+			if (app.Environment.IsDevelopment())
+			{
+				app.UseSwagger();
+				app.UseSwaggerUI();
+			}
 
-      app.MapControllers();
-      app.Run();
-    }
-  }
+			app.UseExceptionHandler(_ => { });
+
+			app.MapControllers();
+			app.Run();
+		}
+	}
 }
+
+
