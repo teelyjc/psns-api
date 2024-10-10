@@ -1,17 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 
-using server.Usecases;
+using server.Domains;
 
 namespace server.Controllers
 {
-	[ApiController]
-	[Route("pets")]
-	public class PetsController : Controller
-	{
-		private readonly PetsUsecases petUsecases;
-		public PetsController(PetsUsecases petUsecases)
-		{
-			this.petUsecases = petUsecases;
-		}
-	}
+  [ApiController]
+  public class PetsController(IPetUsecases petUsecases) : Controller
+  {
+    private readonly IPetUsecases petUsecases = petUsecases;
+  }
 }
