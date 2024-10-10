@@ -1,4 +1,4 @@
-using Npgsql.Replication;
+using server.Domains;
 using server.Libs;
 using server.Repositories;
 using server.Usecases;
@@ -6,50 +6,70 @@ using server.Utils.Error;
 
 namespace Program
 {
-	public class Program
-	{
-		public static void Main(string[] args)
-		{
-			var app = Program.Create(args);
-			Program.Run(app);
-		}
+  public class Program
+  {
+    private static string COR_POLICY = "CORS_COLICY";
+    public static void Main(string[] args)
+    {
+      var app = Program.Setup(args);
+      Program.Run(app);
+    }
 
-		public static WebApplicationBuilder Create(string[] args)
-		{
-			var builder = WebApplication.CreateBuilder(args);
+    public static WebApplicationBuilder Setup(string[] args)
+    {
+      var builder = WebApplication.CreateBuilder(args);
 
-			builder.Services.AddScoped(p => new PgConnection());
+      builder.Services.AddCors(c =>
+      {
+        c.AddPolicy(
+          Program.COR_POLICY,
+          p =>
+        {
+          p.WithOrigins("http://localhost:5555");
+          p.AllowAnyMethod();
+          p.AllowAnyHeader();
+          p.AllowCredentials();
+          p.SetIsOriginAllowed(_ => true);
+        });
+      });
 
-			builder.Services.AddScoped<UsersRepository>();
-			builder.Services.AddScoped<UsersUsecases>();
+      builder.Services.AddScoped(_ => new PgConnection().GetConnection());
 
-			builder.Services.AddScoped<PetsRepository>();
-			builder.Services.AddScoped<PetsUsecases>();
+      // - Initalization of Repositories
+      builder.Services.AddScoped<IUserRepository, UserRepository>();
+      builder.Services.AddScoped<ISessionRepository, SessionRepository>();
+      builder.Services.AddScoped<IPetRepository, PetRepository>();
 
-			builder.Services.AddExceptionHandler<GlobalExceptionFilter>();
+      // - Initialization of Usecases
+      builder.Services.AddScoped<IUserUsecases, UserUsecases>();
+      builder.Services.AddScoped<ISessionUsecases, SessionUsecases>();
+      builder.Services.AddScoped<IPetUsecases, PetUsecases>();
+      builder.Services.AddScoped<IAuthUsecases, AuthUsecases>();
 
-			builder.Services.AddControllers();
-			builder.Services.AddSwaggerGen();
+      builder.Services.AddExceptionHandler<GlobalExceptionFilter>();
 
-			return builder;
-		}
+      builder.Services.AddControllers();
+      builder.Services.AddSwaggerGen();
 
-		public static void Run(WebApplicationBuilder builder)
-		{
-			var app = builder.Build();
+      return builder;
+    }
 
-			if (app.Environment.IsDevelopment())
-			{
-				app.UseSwagger();
-				app.UseSwaggerUI();
-			}
+    public static void Run(WebApplicationBuilder builder)
+    {
+      var app = builder.Build();
+      app.UseCors(Program.COR_POLICY);
 
-			app.UseExceptionHandler(_ => { });
+      if (app.Environment.IsDevelopment())
+      {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+      }
 
-			app.MapControllers();
-			app.Run();
-		}
-	}
+      app.UseExceptionHandler(_ => { });
+      app.MapControllers();
+      app.Run();
+    }
+  }
 }
 
 
