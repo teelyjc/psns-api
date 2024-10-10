@@ -4,7 +4,7 @@ namespace server.Libs
 {
   public class PgConnection
   {
-    private NpgsqlConnection npgsql;
+    private readonly NpgsqlConnection Npgsql;
     public PgConnection()
     {
       String dsn = String.Format(
@@ -19,12 +19,12 @@ namespace server.Libs
       NpgsqlConnection npgsql = new NpgsqlConnection(dsn);
       npgsql.Open();
 
-      this.npgsql = npgsql;
+      this.Npgsql = npgsql;
     }
 
     public NpgsqlConnection GetConnection()
     {
-      return this.npgsql;
+      return this.Npgsql;
     }
   }
 }
