@@ -2,22 +2,22 @@ namespace server.Utils.Error
 {
   public class SystemException
   {
-    private StatusCode statusCode
+    private StatusCode StatusCode
     {
       get;
       set;
     }
 
-    private string message
+    private string Message
     {
       get;
       set;
     }
 
-    public SystemException(StatusCode statusCode, string message)
+    public SystemException(StatusCode StatusCode, string Message)
     {
-      this.statusCode = statusCode;
-      this.message = message;
+      this.StatusCode = StatusCode;
+      this.Message = Message;
     }
   }
   public enum StatusCode
