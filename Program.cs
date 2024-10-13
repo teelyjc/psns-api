@@ -1,5 +1,6 @@
 using server.Domains;
 using server.Libs;
+using server.Middlewares;
 using server.Repositories;
 using server.Usecases;
 using server.Utils.Error;
@@ -8,11 +9,10 @@ namespace Program
 {
   public class Program
   {
-    private static string COR_POLICY = "CORS_COLICY";
+    private static readonly string COR_POLICY = "CORS_COLICY";
     public static void Main(string[] args)
     {
-      var app = Program.Setup(args);
-      Program.Run(app);
+      Run(Setup(args));
     }
 
     public static WebApplicationBuilder Setup(string[] args)
@@ -33,7 +33,13 @@ namespace Program
         });
       });
 
-      builder.Services.AddScoped(_ => new PgConnection().GetConnection());
+      builder.Services.AddScoped(_ => new PostgreSQL(
+        "127.0.0.1",
+        "5432",
+        "root",
+        "THIS-IS-PG-PASSWORD@12345",
+        "pet_system"
+      ).GetConnection());
 
       // - Initalization of Repositories
       builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -46,6 +52,7 @@ namespace Program
       builder.Services.AddScoped<IPetUsecases, PetUsecases>();
       builder.Services.AddScoped<IAuthUsecases, AuthUsecases>();
 
+      builder.Services.AddScoped<AuthMiddleware>();
       builder.Services.AddExceptionHandler<GlobalExceptionFilter>();
 
       builder.Services.AddControllers();
