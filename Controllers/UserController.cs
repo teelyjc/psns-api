@@ -5,28 +5,38 @@ using server.Domains;
 namespace server.Controllers
 {
   [ApiController]
+  [Route("users")]
   public class UserController(IUserUsecases usersUsecases) : Controller
   {
     private readonly IUserUsecases UserUsecases = usersUsecases;
 
-    [HttpPost("signup")]
-    public async Task SignUpAsync(Domains.SignUpUser signUp)
+    [HttpPost("/signup")]
+    public async Task<ActionResult<Response>> SignUp(SignUpUser signUp)
     {
-      await this.UserUsecases.SignUpUser(signUp);
-      return;
+      await this.UserUsecases.SignUp(signUp);
+      return new Response()
+      {
+        Success = true,
+        Data = new Success() { Message = "signed up successfully" }
+      };
     }
 
-    [HttpGet("users/{username}")]
-    public async Task<User> GetUserByUsernameAsync(string username)
+    [HttpGet("{username}")]
+    public async Task<ActionResult<Response<User>>> GetUserByUsername(string username)
     {
-      return await this.UserUsecases.GetUserByUsername(username);
+      User user = await this.UserUsecases.GetUserByUsername(username);
+      return new Response<User>() { Success = true, Data = user };
     }
 
-    [HttpPatch("users")]
-    public async Task UpdateUserAsync(Domains.UpdateUser user)
+    [HttpPatch("{userId}")]
+    public async Task<ActionResult<Response<Success>>> UpdateUserById(string userId, UserUpdateInputs inputs)
     {
-      await this.UserUsecases.UpdateUser(user);
-      return;
+      await this.UserUsecases.UpdateUserById(userId, inputs);
+      return new Response<Success>()
+      {
+        Success = true,
+        Data = new Success() { Message = "user was updated successfully" }
+      };
     }
   }
 }
