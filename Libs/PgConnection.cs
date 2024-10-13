@@ -1,25 +1,28 @@
 using Npgsql;
+using server.Domains;
 
 namespace server.Libs
 {
-  public class PgConnection
+  public class PostgreSQL
   {
     private readonly NpgsqlConnection Npgsql;
-    public PgConnection()
+    public PostgreSQL(string host, string port, string user, string password, string db)
     {
       String dsn = String.Format(
-        "Host={0}; Port={1}; Database={2}; Username={3}; Password={4}",
-        "127.0.0.1",
-        "5432",
-        "pet_system",
-        "root",
-        "THIS-IS-PG-PASSWORD@12345"
+        "Host={0}; Port={1}; Database={2}; Username={3}; Password={4}; Pooling=false",
+        host,
+        port,
+        db,
+        user,
+        password
       );
 
-      NpgsqlConnection npgsql = new NpgsqlConnection(dsn);
-      npgsql.Open();
+      NpgsqlDataSourceBuilder npgsqlDataSourceBuilder = new(dsn);
+      npgsqlDataSourceBuilder.MapEnum<Position>("user_position");
 
-      this.Npgsql = npgsql;
+      NpgsqlDataSource npgsqlDataSource = npgsqlDataSourceBuilder.Build();
+
+      this.Npgsql = npgsqlDataSource.OpenConnection();
     }
 
     public NpgsqlConnection GetConnection()
