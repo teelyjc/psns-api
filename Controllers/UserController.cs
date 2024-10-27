@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using Microsoft.AspNetCore.Mvc;
 
 using server.Domains;
@@ -28,6 +29,17 @@ namespace server.Controllers
       return new Response<User>() { Success = true, Data = user };
     }
 
+    [HttpGet]
+    public async Task<ActionResult<Response<List<User>>>> GetUsers()
+    {
+      List<User> users = await this.UserUsecases.GetUsers(0, 50);
+      return new Response<List<User>>()
+      {
+        Success = true,
+        Data = users
+      };
+    }
+
     [HttpPatch("{userId}")]
     public async Task<ActionResult<Response<Success>>> UpdateUserById(string userId, UserUpdateInputs inputs)
     {
@@ -38,5 +50,6 @@ namespace server.Controllers
         Data = new Success() { Message = "user was updated successfully" }
       };
     }
+
   }
 }
